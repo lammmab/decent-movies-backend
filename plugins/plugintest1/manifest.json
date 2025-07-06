@@ -1,0 +1,8 @@
+{
+  "name": "Plugin test 1",
+  "description": "A cool test plugin made w lua",
+  "version": "1.0.0",
+  "entry": "main.lua",
+  "dependencies": [],
+  "logo": "hi.png"
+}

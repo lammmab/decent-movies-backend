@@ -1,0 +1,22 @@
+{
+  "name": "decent-movies-backend",
+  "version": "1.0.0",
+  "description": "Backend for decent-movies, made to be easy to spin-up",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lammmab/decent-movies-backend.git"
+  },
+  "author": "lammmab",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lammmab/decent-movies-backend/issues"
+  },
+  "homepage": "https://github.com/lammmab/decent-movies-backend#readme",
+  "dependencies": {
+    "node-stream-zip": "^1.15.0"
+  }
+}
