@@ -1,7 +1,7 @@
 # CONTRIBUTERS
 
 ## Create a plugin
-Step 1 - Create a folder somewhere
+Step 1 - Create a folder somewhere\n
 Step 2 - Create these files:
 - manifest.json, filled with:
 ```json
@@ -20,20 +20,6 @@ export default {
   async onStart(API) {
     api = API;
   },
-
-  async search(query) {
-    return [
-      new api.Title({
-        name: `The Amazing World of Gumball`,
-        imageUrl: `https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTrT7oXKTplqRxYMZqclB1V4N0xJVSEU7zqBRdiU_tfu1BRhUrmUrnTnuWf66YQ8t_eEnaM-g`,
-        metadata: { 
-          "Year": "2023",
-          "Type": "TV Show",
-          "Rating": "PG-13",
-        }
-      })
-    ];
-  },
-
 }
 ```
+Step 3 - Write your plugin! Refer to
