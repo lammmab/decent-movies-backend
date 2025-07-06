@@ -1,21 +1,70 @@
 import fs from 'fs/promises';
 import path from 'path';
+import StreamZip from 'node-stream-zip';
+import os from 'os';
+import * as API from './api.js';
 
-const StreamZip = require('node-stream-zip');
+import { pathToFileURL } from 'url';
 
 class Plugin {
-  constructor({ name, description, entry_point, version, logo_path, dependencies }) {
+  constructor({ name, path, description, entry_point, version, logo_path, dependencies }) {
+    this.path = path
     this.name = name || "Default Plugin";
     this.description = description || "Unspecified";
-    this.entry_point = entry_point || "main.lua";
+    this.entry_point = entry_point || "main.js";
     this.version = version || "1.0.0";
     this.logo_path = logo_path || ""; 
     this.dependencies = dependencies;
+    this.search = null;
+    this.getSubtitles = null;
+    this.getTitleInfo = null;
+    this.getPluginSettings = null;
+    this.getEpisode = null;
   }
 }
 
+const TEMP_PLUGIN_DIR = path.join(os.tmpdir(), 'decent-movies-plugins');
+await fs.mkdir(TEMP_PLUGIN_DIR, { recursive: true });
+
 async function startPlugin(plugin) {
+  const zip = new StreamZip.async({ file: plugin.path });
   
+  const pluginTempPath = path.join(TEMP_PLUGIN_DIR, plugin.name);
+  await fs.mkdir(pluginTempPath, { recursive: true });
+
+  await zip.extract(null, pluginTempPath);
+  await zip.close();
+
+  const entryFullPath = path.join(pluginTempPath, plugin.entry_point);
+
+  let pluginModule;
+  try {
+    pluginModule = await import(pathToFileURL(entryFullPath).href);
+  } catch (err) {
+    console.error(`Failed to load plugin ${plugin.name}: ${err.message}`);
+    return;
+  }
+
+  const exported = pluginModule.default || pluginModule;
+
+  if (typeof exported.search === 'function') plugin.search = exported.search;
+  if (typeof exported.getSubtitles === 'function') plugin.getSubtitles = exported.getSubtitles;
+  if (typeof exported.getTitleInfo === 'function') plugin.getTitleInfo = exported.getTitleInfo;
+  if (typeof exported.getPluginSettings === 'function') plugin.getPluginSettings = exported.getPluginSettings;
+  if (typeof exported.getEpisode === 'function') plugin.getEpisode = exported.getEpisode;
+  if (typeof exported.onStart === 'function') {
+    try {
+      await exported.onStart(API);
+    } catch (err) {
+      console.error(`Plugin ${plugin.name} had an error on start:`, err);
+      console.error(`Disabling plugin ${plugin.name} due to error`);
+      return;
+    }
+  }
+
+  global.plugins = global.plugins || [];
+  global.plugins.push(plugin);
+  console.log(`Loaded plugin ${plugin.name}`);
 }
 
 async function loadPluginFromFilepath(filepath) {
@@ -40,6 +89,7 @@ async function loadPluginFromFilepath(filepath) {
   await zip.close();
 
   const plugin = new Plugin({
+    path: filepath,
     name: manifest.name,
     description: manifest.description,
     entry_point: manifest.entry,
@@ -59,8 +109,8 @@ async function loadPlugins() {
     const plugins = entries
       .filter(entry => entry.isFile() && entry.name.endsWith('.zip'))
       .map(entry => path.join(pluginsDir,entry.name))
-
-    for (const plugin in plugins) {
+    for (const plugin of plugins) {
+      console.log(plugin)
       await loadPluginFromFilepath(plugin)
     }
   } catch (err) {
@@ -68,4 +118,4 @@ async function loadPlugins() {
   }
 }
 
-export { loadPlugins }
+export { loadPlugins,loadPluginFromFilepath }

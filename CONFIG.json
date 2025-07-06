@@ -1,5 +1,5 @@
 {
   "master_password": "supersecret",
   "plugins_folder": "./plugins",
-  "port": 3000
+  "port": 5000
 }

@@ -1,8 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class Config {
-  constructor({}) {
+  constructor() {
     const configPath = path.resolve(__dirname, '../CONFIG.json');
 
     let configData;
