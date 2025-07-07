@@ -110,7 +110,6 @@ async function loadPlugins() {
       .filter(entry => entry.isFile() && entry.name.endsWith('.zip'))
       .map(entry => path.join(pluginsDir,entry.name))
     for (const plugin of plugins) {
-      console.log(plugin)
       await loadPluginFromFilepath(plugin)
     }
   } catch (err) {

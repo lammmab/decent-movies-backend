@@ -1,9 +1,16 @@
 import express from 'express';
-import { getEpisode,getPluginByName } from './pluginFunctions';
+import { getEpisode,getPluginByName } from '../utils/pluginFunctions.js';
+import { isValidToken } from '../utils/authFunctions.js';
 const router = express.Router();
 
-router.post('/', (req, res) => {
-  const { plugin, title, s, e } = req.body;
+// takes in plugin name, title, season and episode (if a tv show) and returns the servers etc. provided from plugins
+router.post('/', async (req, res) => {
+  const { token, plugin, title, s, e } = req.body;
+  if (!isValidToken(token)) {
+    res.status(500).json({ error: 'You don\'t have proper authentication!' });
+    return;
+  }
+
   let plug;
   try {
     plug = getPluginByName(plugin);
@@ -13,7 +20,7 @@ router.post('/', (req, res) => {
   }
 
   try {
-    let episode = getEpisode(title,s,e,plug);
+    let episode = await getEpisode(title,s,e,plug);
     res.json({ episode });
   } catch (err) {
     res.status(404).json({ error: 'Failed to get episode: ', details: err.message });

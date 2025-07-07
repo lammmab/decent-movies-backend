@@ -26,6 +26,7 @@ class Config {
 
     this.plugins_folder = configData.plugins_folder;
     this.port = configData.port;
+    this.user_passwords = configData.user_passwords || null;
     this.master_password = configData.master_password;
   }
 }

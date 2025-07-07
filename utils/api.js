@@ -1,39 +1,51 @@
+import * as cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
+
+/**
+ * 
+ * The plugin API
+ * written by lammmab
+ * these classes are what you must format your data to,
+ * i provide some helpers like puppeteer and cheerio and httpgethtml.
+ * 
+ * the four important async commands for your plugin are:
+ * - async onStart(API) -> save the API for use, and set/load config info.
+ * - async search(query) -> get your titles, return back an array of titles.
+ * - async getEpisode(title,season,episodeNumber) -> return back a specific Episode with stream links as a Servers of Server
+ * - async getTitleInfo(title) -> compile title into either movies (leave of TitleDetails seasons as an empty array) or tv shows (provide Seasons with an array of VisualEpisode)
+ * 
+ * TBI:
+ * - async getSubtitles(title)
+ * 
+ */
+
 class Title {
-  /**
-   * @param {Object} options
-   * @param {string} options.name
-   * @param {string} options.image
-   * @param {Object} [options.metadata] - optional extra info like year, genre, rating
-   */
-  constructor({name,image,metadata}) {
+  constructor({name,imageUrl,metadata}) {
     this.name = name
-    this.imageUrl = image
+    this.imageUrl = imageUrl
     this.metadata = metadata
   }
 }
 
 class Season {
-  /**
-   * @param {Object} options
-   * @param {number} options.num - season number
-   * @param {number} options.episodeCount
-   * @param {string[]} options.episodeNames
-   */
-  constructor({num, episodeCount, episodeNames}) {
-    this.number = num
+  constructor({number, episodeCount, episodes}) {
+    this.number = number
     this.episodeCount = episodeCount
-    this.episodeNames = episodeNames
+    this.episodes = episodes
+  }
+}
+
+class VisualEpisode {
+  constructor({ 
+    number,
+    name
+  }) {
+    this.number = number
+    this.name = name
   }
 }
 
 class Episode {
-  /**
-   * @param {Object} options
-   * @param {Servers} options.servers - streaming links
-   * @param {string} options.name - episode name/title
-   * @param {number} options.episodeNum
-   * @param {number} options.seasonNum
-   */
   constructor({servers, name, episodeNum, seasonNum}) {
     this.servers = servers
     this.name = name
@@ -43,13 +55,6 @@ class Episode {
 }
 
 class Server {
-  /**
-   * @param {Object} options
-   * @param {string} options.url
-   * @param {string} [options.name] - e.g. "Server 1", "FastStream"
-   * @param {string} [options.quality] - e.g. "1080p"
-   * @param {string} [options.language] - e.g. "en"
-   */
   constructor({ url, name, quality, language }) {
     this.url = url;
     this.name = name || "Server";
@@ -65,15 +70,8 @@ class Servers {
 }
 
 class TitleDetails {
-  /**
-   * @param {Object} options
-   * @param {string} options.name
-   * @param {string} options.image
-   * @param {Season[]} options.seasons
-   * @param {Object} [options.metadata]
-   */
-  constructor({name, image, seasons, metadata}) {
-    this.name = name
+  constructor({name, image, seasons, metadata, isMovie}) {
+    this.isMovie = isMovie
     this.image = image
     this.seasons = seasons
     this.metadata = metadata
@@ -86,4 +84,15 @@ async function httpGet(url, options) {
   return await res.json();
 }
 
-export { Title,Episode,Season,TitleDetails,Servers,Server,httpGet }
+async function httpGetHtml(url, options) {
+  const res = await fetch(url, options);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return await res.text();
+}
+
+function cheerio_load(html) {
+  return cheerio.load(html);
+}
+
+
+export { Title,Episode,Season,TitleDetails,Servers,Server,VisualEpisode,httpGet,httpGetHtml,cheerio_load,puppeteer }

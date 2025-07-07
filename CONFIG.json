@@ -1,5 +1,9 @@
 {
   "master_password": "supersecret",
   "plugins_folder": "./plugins",
+  "user_passwords": [
+    "love4all",
+    "lovinguser"
+  ],
   "port": 5000
 }
