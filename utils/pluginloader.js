@@ -8,7 +8,8 @@ import { pathToFileURL } from 'url';
 
 class Plugin {
   constructor({ name, path, description, entry_point, version, logo_path, dependencies }) {
-    this.path = path
+    this.path = path;
+    this.disabled = false;
     this.name = name || "Default Plugin";
     this.description = description || "Unspecified";
     this.entry_point = entry_point || "main.js";

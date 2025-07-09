@@ -29,4 +29,14 @@ export default {
 * Get subtitles hooked up for plugin development
 * Hook all backend errors up to frontend if they should be
 * Get plugins sending their configs (also add saving/loading configs easily for plugins to use)
-* proxy the streaming links (m3u8)
+* toProxyUrl(url)
+* - Proxy raw .m3u8 URLs that are protected by CORS, tokens, headers, etc.
+* - Returns a proxied URL from your server that clients can consume directly.
+* toM3U8(url)
+* - Converts raw video files (MP4, MKV, etc.) to .m3u8 (HLS) streamed from your server.
+* - Returns the HLS playlist URL you host.
+* extract(url)
+* - For embed URLs, extract direct video URLs (.m3u8, MP4, etc.).
+* - Pass extracted URLs to either toProxyUrl or toM3U8 depending on the format.
+* -  qReturns a playable link (proxied or converted).
+

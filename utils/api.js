@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
+import path from 'path';
 
 /**
  * 
@@ -94,5 +95,27 @@ function cheerio_load(html) {
   return cheerio.load(html);
 }
 
+export async function disable() {
+  const stack = new Error().stack;
+  const lines = stack.split("\n");
+
+  const callerLine = lines[2];
+
+  const match = callerLine.match(/\((.*):\d+:\d+\)/) || callerLine.match(/at (.*):\d+:\d+/);
+  if (!match) {
+    console.error("Could not determine caller file in disable()");
+    return;
+  }
+
+  const callerPath = match[1];
+  const plugin = global.plugins.find(p => callerPath.startsWith(path.join(os.tmpdir(), 'decent-movies-plugins', p.name)));
+
+  if (!plugin) {
+    console.error(`No matching plugin found for disable() caller ${callerPath}`);
+    return;
+  }
+
+  plugin.disabled = true;
+}
 
 export { Title,Episode,Season,TitleDetails,Servers,Server,VisualEpisode,httpGet,httpGetHtml,cheerio_load,puppeteer }

@@ -7,9 +7,10 @@ function getPluginByName(name) {
 }
 
 async function getEpisode(title,season,episodeNumber,plugin) {
+  if (plugin.disabled) return {};
   let episode = await plugin.getEpisode(title,season,episodeNumber);
-  if (!episode instanceof Episode) {
-    throw new Error("plugin episode not instance of api episode!")
+  if (!(episode instanceof Episode)) {
+    throw new Error("plugin episode not instance of API Episode!");
   }
   if (!episode.servers) {
     throw new Error("No servers for episode!")
@@ -19,6 +20,7 @@ async function getEpisode(title,season,episodeNumber,plugin) {
 }
 
 async function getTitleDetailsByPlugin(title,plugin) {
+  if (plugin.disabled) return {};
   let result = await plugin.getTitleInfo(title);
   if (result instanceof TitleDetails) {
     if (Array.isArray(result.seasons)) {
@@ -36,8 +38,15 @@ async function getTitleDetailsByPlugin(title,plugin) {
 
 async function combinedSearch(query) {
   let totalResults = [];
+  let searchResult;
   for (const plugin of global.plugins) {
-    let searchResult = await plugin.search(query);
+    if (plugin.disabled) continue;
+
+    try { searchResult = await plugin.search(query); } catch (e) {
+      console.warn(`Error in plugin ${plugin.name}: ${e}`)
+      continue;
+    }
+    
     if (Array.isArray(searchResult)) {
       const allAreTitles = searchResult.every(
         item => item instanceof Title
